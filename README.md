@@ -4,7 +4,7 @@ This is my Master Thesis project. The goal is to approximate a given painting by
  
 - Stochastic Hillclimber
 - Simulated Annealing
-- Plant propagation algorithms
+- Plant propagation algorithm
  
  
 ## Installation
