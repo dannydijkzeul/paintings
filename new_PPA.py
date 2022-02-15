@@ -142,7 +142,7 @@ if __name__ == "__main__":
     filename = str(args.argfilename[0])
     imagePath = "imgs/" + filename
 
-    strokeCount = 250
+    strokeCount = 50
     maxOffspring = 5
     evaluations = 1000000
 
@@ -153,6 +153,14 @@ if __name__ == "__main__":
     today = str(dt_string)
     
     evalCount = 0
+    try:
+        os.mkdir("output_dir")
+    except Exception:
+        print("Dir exists")
+    try:
+        os.mkdir("output_dir/"+filename)
+    except Exception:
+        print("Dir exists")
     logger  = "output_dir/"+ filename + "/log-PPA-" + str(strokeCount) + "-" + str(evaluations) + "-" + today
     logger = logger + "-v" + str(len(glob.glob(logger)))   
     f = open(logger, "w")
@@ -178,7 +186,7 @@ if __name__ == "__main__":
 
         end = time.time()
         print(evalCount, population[0].current_error, len(offspring), "Full duration " + str(end - start))
-
+        cv2.imwrite("output_dir/"+ filename +"/PPA-intermediate-" + str(strokeCount) + "-" + today + ".png" , population[0].canvas_memory)
         f.flush()
         sys.stdout.flush()
 

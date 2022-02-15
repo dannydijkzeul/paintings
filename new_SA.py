@@ -5,6 +5,7 @@ import sys
 import pickle
 import argparse
 import glob
+import os
 from datetime import datetime
 import cv2
 import time
@@ -14,8 +15,16 @@ def simulated_annealing(painting, evaluations, filename):
     now = datetime.now()
     dt_string = now.strftime("%Y-%m-%d_%H-%M-%S")
     today = str(dt_string)
+    logger = "output_dir/"+filename+"/log-SA-" + str(len(painting.strokes))+ "-" + str(evaluations) + "-" + today
+    try:
+        os.mkdir("output_dir")
+    except Exception:
+        print("Dir exists")
+    try:
+        os.mkdir("output_dir/"+filename)
+    except Exception:
+        print("Dir exists")
 
-    logger  = "output_dir/"+filename+"/log-SA-" + str(len(painting.strokes))+ "-" + str(evaluations) + "-" + today
     f = open(logger, "w")
     for i in range(evaluations):
         mutatedStrokes = painting.mutate()
@@ -26,13 +35,14 @@ def simulated_annealing(painting, evaluations, filename):
         # if the MSE is lowered accept the mutated stroke
         if error < painting.current_error:
             painting.current_error = error
-            painting.canvas_memory = img 
+            painting.canvas_memory = img
             painting.strokes = mutatedStrokes
 
             painting.current_best_error = error
             painting.current_best_canvas = img
-           
+
             print(i, ". new best:", painting.current_error)
+            cv2.imwrite("output_dir/" + filename + "/SA-intermediate-" + str(len(painting.strokes)) + "-" + today + ".png", painting.canvas_memory)
             writeTolog(f, i, painting.current_error, strokeAnalyze(painting), 0)
 
         elif error > painting.current_error:
@@ -42,18 +52,18 @@ def simulated_annealing(painting, evaluations, filename):
             # if the random value is within the probability accept the new stroke
             if random.random() < probability:
                 painting.current_error = error
-                painting.canvas_memory = img 
+                painting.canvas_memory = img
                 painting.strokes = mutatedStrokes
-            
+
                 print(i, ". SA Accept new best:", painting.current_error)
                 writeTolog(f, i, painting.current_error, strokeAnalyze(painting), 1)
+
         sys.stdout.flush()
         f.flush()
 
-
-        # output pickle 
+        # output pickle
         if i == 250000 or i == 0 or i == 500000 or i == 750000:
-            pickle.dump( painting, open( "output_dir/" + filename + "/SA-" + str(len(painting.strokes)) + "-"+ today+ "-" + str(i) +".p", "wb" ) )
+            pickle.dump(painting, open( "output_dir/" + filename + "/SA-" + str(len(painting.strokes)) + "-"+ today+ "-" + str(i) +".p", "wb"))
 
     # Final image
     cv2.imwrite("output_dir/" + filename + "/SA-final-" + str(len(painting.strokes)) + "-" + today + ".png" , painting.canvas_memory)
@@ -101,7 +111,7 @@ if __name__ == "__main__":
     filename = str(args.argfilename[0])
     imagePath = "imgs/" + filename
 
-    strokeCount = 250
+    strokeCount = 50
     evaluations = 1000000
 
     canvas = Painting(imagePath)

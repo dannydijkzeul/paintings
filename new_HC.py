@@ -14,6 +14,14 @@ def hillclimber(painting, evaluations, filename):
     now = datetime.now()
     dt_string = now.strftime("%Y-%m-%d_%H-%M-%S")
     today = str(dt_string)
+    try:
+        os.mkdir("output_dir")
+    except Exception:
+        print("Dir exists")
+    try:
+        os.mkdir("output_dir/"+filename)
+    except Exception:
+        print("Dir exists")
     logger  = "output_dir/"+filename+"/log-HC-" + str(len(painting.strokes))+ "-" + str(evaluations) + "-" + today 
 
     f = open(logger, "w")
@@ -33,7 +41,7 @@ def hillclimber(painting, evaluations, filename):
             t = time.localtime()
             t = time.strftime("%H:%M:%S", t)
             writeTolog(t, f, i, painting.current_error, strokeAnalyze(painting))
-
+            cv2.imwrite("output_dir/" + filename + "/HC-intermediate-" + str(len(painting.strokes)) + "-" + today + ".png" , painting.canvas_memory)
         sys.stdout.flush()
         f.flush()
 
@@ -74,7 +82,7 @@ if __name__ == "__main__":
     filename = str(args.argfilename[0])
     imagePath = "imgs/" + filename
 
-    strokeCount = 250
+    strokeCount = 50
     evaluations = 1000000
 
     canvas = Painting(imagePath)
