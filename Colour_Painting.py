@@ -101,33 +101,34 @@ class Painting:
         options = [0,1,2,3,4,5]
         mutateOption = random.choice(options)
         # swap index with other brush
-        if mutateOption == 0:
-            # remove swapped brushStroke form strokes
-            copyStrokes.pop(mutatedStroke.index)
-    
-            # select random number for the insert
-            insertIndex = int(random.randrange(0, len(copyStrokes)))
-            copyStrokes.insert(insertIndex, mutatedStroke)
+        #if mutateOption == 0:
+        #    # remove swapped brushStroke form strokes
+        #    copyStrokes.pop(mutatedStroke.index)
 
-            # fix all indeces
-            for i in range(0, len(copyStrokes)):
-                copyStrokes[i].index = i
+        #    # select random number for the insert
+        #    insertIndex = int(random.randrange(0, len(copyStrokes)))
+        #    copyStrokes.insert(insertIndex, mutatedStroke)
+
+        #    # fix all indeces
+        #    for i in range(0, len(copyStrokes)):
+        #        copyStrokes[i].index = i
 
         # mutate color
-        elif mutateOption == 1:
-            mutatedStroke.color = mutatedStroke.new_color()
+        #elif mutateOption == 1:
+        mutatedStroke.color = mutatedStroke.mut_color(mutatedStroke.color)
         # mutate size
-        elif mutateOption == 2:
-            mutatedStroke.size = mutatedStroke.new_size(self.minSize, self.maxSize)
+        #elif mutateOption == 2:
+        mutatedStroke.size = mutatedStroke.mut_size(self.minSize, self.maxSize, mutatedStroke.size)
         # mutate position
-        elif mutateOption == 3:
-            mutatedStroke.posY, mutatedStroke.posX = mutatedStroke.gen_new_positions(self.bound)
+        #elif mutateOption == 3:
+        mutatedStroke.posY, mutatedStroke.posX = mutatedStroke.mut_positions(self.bound, [mutatedStroke.posY, mutatedStroke.posX])
         # mutate rotation
-        elif mutateOption == 4:
-            mutatedStroke.rotation = mutatedStroke.new_rotation()
+        #elif mutateOption == 4:
+        mutatedStroke.rotation = mutatedStroke.mut_rotation(mutatedStroke.rotation)
         # mutate brush type
-        elif mutateOption == 5:
-            mutatedStroke.brush_type = mutatedStroke.new_brush_type(self.maxBrushNumber)
+        #elif mutateOption == 5:
+        if mutateOption == 5:
+                    mutatedStroke.brush_type = mutatedStroke.new_brush_type(self.maxBrushNumber)
 
         return copyStrokes      
 
@@ -255,32 +256,93 @@ class Brush_stroke:
     def new_size(self, minSize, maxSize):
         new_size = random.random()*(maxSize-minSize) + minSize
         return new_size
-    
+
     def new_rotation(self):
         new_rotation = random.randrange(-180, 180)
         return new_rotation
-    
+
     def new_brush_type(self, maxBrushNumber):
         new_brush_type = random.randrange(1, maxBrushNumber)
         return new_brush_type
 
+    def mut_color(self, color):
+        new_color = color
+        mu = 0
+        sigma = 50
+        new_color[0] += np.random.normal(mu, sigma)
+        new_color[1] += np.random.normal(mu, sigma)
+        new_color[2] += np.random.normal(mu, sigma)
+        if new_color[0] < 0:
+            new_color[0] = 0
+        if new_color[1] < 0:
+            new_color[1] = 0
+        if new_color[2] < 0:
+            new_color[2] = 0
+        if new_color[0] > 255:
+            new_color[0] = 255
+        if new_color[1] > 255:
+            new_color[1] = 255
+        if new_color[2] > 255:
+            new_color[2] = 255
+        return new_color
+
+    def mut_size(self, minSize, maxSize, size):
+        mu = 0
+        sigma = 0.2
+        mutation = np.random.normal(mu, sigma)
+        new_size = size + mutation
+        if new_size > maxSize:
+            new_size = maxSize
+        if new_size < minSize:
+            new_size = minSize
+        return new_size
+
+    def mut_rotation(self, rotation):
+        mu = 0
+        sigma = 30
+        mutation = np.random.normal(mu, sigma)
+        rotation += mutation
+        if rotation < -180:
+            rotation = 180
+        if rotation > 180:
+            rotation = 180
+        return rotation
+
+    def mut_brush_type(self, maxBrushNumber):
+        new_brush_type = random.randrange(1, maxBrushNumber)
+        return new_brush_type
+
+    def mut_positions(self, bound, position):
+        mu = 0
+        sigma = 20
+        position[0] = position[0]+np.random.normal(mu, sigma)
+        position[1] = position[1]+np.random.normal(mu, sigma)
+        if position[0] < 1:
+            position[0] = 1
+        if position[1] < 1:
+            position[1] = 1
+        if position[0] > bound[0]:
+            position[0] = bound[0]
+        if position[1] > bound[1]:
+            position[1] = bound[1]
+        return position
 
     # generate new brush positions for the brush
     def gen_new_positions(self, bound):
-        posY = int(random.randrange(0, bound[0]))
-        posX = int(random.randrange(0, bound[1]))
-        return [posY, posX]
+        posX = int(random.randrange(0, bound[0]))
+        posY = int(random.randrange(0, bound[1]))
+        return [posX, posY]
 
     def randomAttributes(self, minSize, maxSize, maxBrushNumber, bound):
-        #random color
+        # random color
         self.color = self.new_color()
-        #random size
+        # random size
         self.size = self.new_size(minSize, maxSize)
-        #random pos
+        # random pos
         self.posY, self.posX = self.gen_new_positions(bound)
-        #random rotation
+        # random rotation
         self.rotation = self.new_rotation()
-        #random brush number
+        # random brush number
         self.brush_type = self.new_brush_type(maxBrushNumber)
 
 
